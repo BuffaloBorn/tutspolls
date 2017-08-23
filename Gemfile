@@ -12,13 +12,19 @@ gem 'puma', '~> 3.7'
 gem 'sass-rails', '~> 5.0'
 gem 'uglifier', '>= 1.3.0'
 
+gem 'bootstrap-sass'
+gem 'jquery-rails'
 gem 'coffee-rails', '~> 4.2'
 gem 'turbolinks', '~> 5'
 gem 'jbuilder', '~> 2.5'
 gem 'haml-rails'
 gem 'pry-rails'
+
 gem 'spring' , group: :development
 
+group :development do
+  gem 'html2haml'
+end
 
 group :test do
   gem 'factory_girl_rails'
