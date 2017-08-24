@@ -37,8 +37,7 @@ Instead of just adding
 ```
 This worked for this application instead below _app/assets/stylesheets/application.css_:
 ```css
-@import "bootstrap-sprockets";
-@import "bootstrap";
+*= '_bootstrap'
 ```
 Add this to _app/assets/javascript/application.js_
 ```javascript
@@ -70,3 +69,13 @@ root 'polls#index'
 ```
 
 Now go to http://localhost:3000/
+
+Convert _app/views/layouts/application.html.erb_ to haml, there is html2haml gem but I used the following site: http://htmltohaml.com/
+
+Copy current layout and paste the results.
+
+Created a new folder: _app/views/application/&#95;nav.html.haml_
+
+Make sure you go to the correct version of Bootstrap that matches the version that is provide within bootstrap-sass-3.3.7.gem
+
+Go to [Bootstrap Navbar](https://getbootstrap.com/docs/3.3/components/#navbar)
