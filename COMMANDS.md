@@ -115,6 +115,7 @@ Now we look at _/app/views/questions/&#95;form.html.haml_, as you can see we hav
 = form_for @question do |f|
 ```
 
+
 but there isn't a route defined that only have ```/questions``` so  have modify the above form helper piece to include both
 
 ```ruby
@@ -137,4 +138,43 @@ In the middle of rendering the page, noticed that reference error with poll_id w
 ```bash
 $ rails g migration AddPollIdToQuestions poll:references
 $ rake db:migrate
+```
+Within _/app/views/questions/&#95;form.html.haml_, we do not want to show the poll text field
+
+```ruby
+= f.label :poll
+= f.text_field :poll
+```
+but a hidden field like so
+
+```ruby
+= f.label :poll
+= f.hidden_field :poll
+```
+
+But if you inspect the code in the browser, it doesn't have a value for the hidden_field
+
+Remember the _/app/controller/questions_controller.rb_ has a new method that
+
+```ruby
+def new
+  @question = @Question.new
+end
+```
+but it should create a new question that relates to the current poll as it does in the following method
+
+```ruby
+def new
+  @question = @poll.questions.build
+end
+```
+
+In the _/app/models/polls.rb_, make sure there a relation
+
+```ruby
+class Poll < ApplicationRecord
+  validates_presence_of :title
+
+  has_many :questions  
+end
 ```
