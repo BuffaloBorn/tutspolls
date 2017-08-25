@@ -132,3 +132,9 @@ to
 ```ruby
 = link_to 'Back', @poll
 ```
+In the middle of rendering the page, noticed that reference error with poll_id where nested question in poll was not being reference properly. Had to generate/run a new migration to fix the error
+
+```bash
+$ rails g migration AddPollIdToQuestions poll:references
+$ rake db:migrate
+```
