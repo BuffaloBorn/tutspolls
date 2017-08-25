@@ -1,9 +1,6 @@
-%p#notice= notice
+%h1= @poll.title
 
-%p
-  %b Title:
-  = @poll.title
-
-= link_to 'Edit', edit_poll_path(@poll)
-\|
-= link_to 'Back', polls_path
+%p.btn-group
+  = link_to 'Edit', edit_poll_path(@poll), class: "btn btn-default"
+  = link_to 'Back', polls_path, class: "btn btn-default"
+  = link_to 'Add Question', new_poll_question_path(@poll), class: "btn btn-default"

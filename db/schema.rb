@@ -10,12 +10,21 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20170823021918) do
+ActiveRecord::Schema.define(version: 20170825052806) do
 
   create_table "polls", force: :cascade do |t|
     t.string "title"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+  end
+
+  create_table "questions", force: :cascade do |t|
+    t.string "title"
+    t.string "kind"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.integer "poll_id"
+    t.index ["poll_id"], name: "index_questions_on_poll_id"
   end
 
 end

@@ -1,4 +1,4 @@
-# timetracker
+# Tutspolls
 
 ## 01 02 - Bootstrapping the Project
 
@@ -16,7 +16,7 @@ $ bundle exec spring binstub --all
 
 ```bash
 $ vi Gemfile
-:g:^#
+:g^#
 :g::normal dd
 ```
 
@@ -79,3 +79,56 @@ Created a new folder: _app/views/application/&#95;nav.html.haml_
 Make sure you go to the correct version of Bootstrap that matches the version that is provide within bootstrap-sass-3.3.7.gem
 
 Go to [Bootstrap Navbar](https://getbootstrap.com/docs/3.3/components/#navbar)
+
+## 02 02 Adding question
+
+````bash
+$ rails g scaffold question title kind poll:references
+```
+Now lets edit the _/config/routes.rb_ so move
+
+```ruby
+  resources :questions
+
+  resources :polls
+```
+to
+
+```ruby
+root 'polls#index'
+resources :polls do
+    resources :questions
+end
+```
+
+This allows us to have a route like:```/polls/1/questions```
+
+Now we need to change the controller definition
+
+In the controller, we define a before action that will call the set_poll method that will look for a poll by its poll_id within the Poll model; this will occur every time the question controller is requested.
+
+When you request, ```/poll/1/questions```, the ```1``` is the poll_id
+
+Now we look at _/app/views/questions/&#95;form.html.haml_, as you can see we have
+
+```ruby
+= form_for @question do |f|
+```
+
+but there isn't a route defined that only have ```/questions``` so  have modify the above form helper piece to include both
+
+```ruby
+= form_for [@poll, @question] do |f|
+```
+but we still have errors within _/app/views/questions/new.html.haml_
+
+```ruby
+= link_to 'Back', questions_path
+```
+because ```/questions_path``` doesn't exit but we can replace that path with ```@poll``` instance variable
+
+to
+
+```ruby
+= link_to 'Back', @poll
+```
