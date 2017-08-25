@@ -8,12 +8,9 @@
 
   .field
     = f.label :title
-    = f.text_field :title
+    = f.text_field :title, class: "form-control"
   .field
     = f.label :kind
-    = f.text_field :kind
-  .field
-    = f.label :poll
-    = f.hidden_field :poll
+    = f.text_field :kind , class: "form-control"
   .actions
-    = f.submit 'Save'
+    = f.submit 'Save', class: "btn btn-primary"

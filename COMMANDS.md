@@ -178,3 +178,13 @@ class Poll < ApplicationRecord
   has_many :questions  
 end
 ```
+
+After rendering  _app/views/questions/&#95;forms.html.haml_,
+it populates the hidden_value a Poll object not a poll_id
+
+It we look closely, we do not need Poll object on tis page at all because we have the  poll_id in. So we can remove the following session of code:
+
+```ruby
+= f.label :poll
+= f.hidden_field :poll
+```
