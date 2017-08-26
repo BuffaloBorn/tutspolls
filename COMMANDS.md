@@ -351,3 +351,8 @@ Let's go to the _app/views/polls/show.html.haml_, add the following code to disp
       -question.possible_answers.each do |possible_answer|
         %li=possible_answer.title
 ```
+Before we move on we need to clean  up the database with all the null title records.
+
+Refer to rake take: tutspolls:db_clean
+
+Interesting CSV rake task from [stackoverflow](https://stackoverflow.com/questions/18859514/rails-rake-task-how-to-delete-records)
