@@ -356,3 +356,72 @@ Before we move on we need to clean  up the database with all the null title reco
 Refer to rake take: tutspolls:db_clean
 
 Interesting CSV rake task from [stackoverflow](https://stackoverflow.com/questions/18859514/rails-rake-task-how-to-delete-records)
+
+## 2.4 Replies and Answers
+
+Now it time to go to the next level and allow the users to reply back to a poll.
+
+Reply need to be referenced to a poll, question and possible answer. Refer back 1.3 Defining the Business Model.
+
+```bash
+$ rails g model reply poll:references
+```
+Remember that test are being generated with these rails generators but it is not justifiable to do our test just yet.
+
+Now we create answer model, that references many other tables like particular reply, particular question, and in the case of multiply choice type question with reference the possible_answers plus if we have open answer question we nee to add a value.
+
+```bash
+$ rails g model answer reply:references question:references possible_answer:references value
+$ rake db:migrate
+```
+
+Next its time to create the necessary forms to allow us to create relies and answers. First we'll craft a controller by hand; we could of done it with the scaffold generator but it would create extra files that we do not need right now. Create a file named: _app/controller/replies&#96;controller.rb_
+
+Refer to class created above
+
+Now we need to update _config/routes.rb_, it should now look this
+```ruby
+Rails.application.routes.draw do
+
+  root 'polls#index'
+  resources :polls do
+      resources :questions
+      resources :replies, only: [:new, :create]
+  end
+end
+```
+Now we need to review the generated routes
+
+```bash
+$ rake routes
+```
+Here is the list of available routes:
+```bash
+                        P r e f i x   V e r b       U R I   P a t t e r n                                                                     C o n t r o l l e r # A c t i o n  
+                             r o o t   G E T         /                                                                                         p o l l s # i n d e x  
+         p o l l _ q u e s t i o n s   G E T         / p o l l s / : p o l l _ i d / q u e s t i o n s ( . : f o r m a t )                     q u e s t i o n s # i n d e x  
+                                       P O S T       / p o l l s / : p o l l _ i d / q u e s t i o n s ( . : f o r m a t )                     q u e s t i o n s # c r e a t e  
+   n e w _ p o l l _ q u e s t i o n   G E T         / p o l l s / : p o l l _ i d / q u e s t i o n s / n e w ( . : f o r m a t )             q u e s t i o n s # n e w  
+ e d i t _ p o l l _ q u e s t i o n   G E T         / p o l l s / : p o l l _ i d / q u e s t i o n s / : i d / e d i t ( . : f o r m a t )   q u e s t i o n s # e d i t  
+           p o l l _ q u e s t i o n   G E T         / p o l l s / : p o l l _ i d / q u e s t i o n s / : i d ( . : f o r m a t )             q u e s t i o n s # s h o w  
+                                       P A T C H     / p o l l s / : p o l l _ i d / q u e s t i o n s / : i d ( . : f o r m a t )             q u e s t i o n s # u p d a t e  
+                                       P U T         / p o l l s / : p o l l _ i d / q u e s t i o n s / : i d ( . : f o r m a t )             q u e s t i o n s # u p d a t e  
+                                       D E L E T E   / p o l l s / : p o l l _ i d / q u e s t i o n s / : i d ( . : f o r m a t )             q u e s t i o n s # d e s t r o y  
+             p o l l _ r e p l i e s   P O S T       / p o l l s / : p o l l _ i d / r e p l i e s ( . : f o r m a t )                         r e p l i e s # c r e a t e  
+         n e w _ p o l l _ r e p l y   G E T         / p o l l s / : p o l l _ i d / r e p l i e s / n e w ( . : f o r m a t )                 r e p l i e s # n e w  
+                           p o l l s   G E T         / p o l l s ( . : f o r m a t )                                                           p o l l s # i n d e x  
+                                       P O S T       / p o l l s ( . : f o r m a t )                                                           p o l l s # c r e a t e  
+                     n e w _ p o l l   G E T         / p o l l s / n e w ( . : f o r m a t )                                                   p o l l s # n e w  
+                   e d i t _ p o l l   G E T         / p o l l s / : i d / e d i t ( . : f o r m a t )                                         p o l l s # e d i t  
+                             p o l l   G E T         / p o l l s / : i d ( . : f o r m a t )                                                   p o l l s # s h o w  
+                                       P A T C H     / p o l l s / : i d ( . : f o r m a t )                                                   p o l l s # u p d a t e  
+                                       P U T         / p o l l s / : i d ( . : f o r m a t )                                                   p o l l s # u p d a t e  
+                                       D E L E T E   / p o l l s / : i d ( . : f o r m a t )                                                   p o l l s # d e s t r o y  
+ ```
+In the reply_params method, we have to make sure we place all the params that can be submitted to replies controller are included even they are need used in every request.  
+
+```ruby
+def reply_params
+  params.require(:reply).permit({:poll_id answers_attributes: [ :value, :question_id, :reply_id, :possible_answer_id ] })
+end
+```
