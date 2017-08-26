@@ -12,7 +12,7 @@ class QuestionsController < ApplicationController
 
   def new
     @question = @poll.questions.build
-    @question.save
+    @question.possible_answers.build
   end
 
   def edit

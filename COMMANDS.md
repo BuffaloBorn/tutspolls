@@ -1,6 +1,6 @@
 # Tutspolls
 
-## 01 02 - Bootstrapping the Project
+## 1.2 - Bootstrapping the Project
 
 make sure you add the following to the Gemfile
 
@@ -20,7 +20,7 @@ $ vi Gemfile
 :g::normal dd
 ```
 
-## 2 1 Creating Polls
+## 2.1 Creating Polls
 
 ```bash
 $ rails generate scaffold poll title
@@ -80,7 +80,7 @@ Make sure you go to the correct version of Bootstrap that matches the version th
 
 Go to [Bootstrap Navbar](https://getbootstrap.com/docs/3.3/components/#navbar)
 
-## 02 02 Adding question
+## 2.2 Adding questions
 
 ````bash
 $ rails g scaffold question title kind poll:references
@@ -234,3 +234,42 @@ end
 Make sure pay attention to ```question_params``` method is defined in the private section
 
 This is a rails way of restricting a particular dataset that is coming from the outside.
+
+## 2.3 Adding Possible Answers
+
+In this case, we do not need to generate a scaffold because the way to create answer is though a question form
+
+```bash
+$ rails g model possible_answers
+$ rake db:migrate
+```
+Need to modify the _app/models/question.rb_ to inform questions model that it has many possible answers
+
+```ruby
+  has_many :possile_answers
+```
+
+Now we look at _app/views/questions/&#95;form.html.haml_ and add the following
+
+```ruby
+-f.fields_for :possible_answers do |c|
+  =c.text  
+```
+This allow us to define fields for associated models
+
+So if we render this page, it will not display anything because there isn't any possible answers available to this question.
+
+We need to go to _app/controller/question_contoller.rb_ and make sure in new method that there is a possible_answer available to render for all new questions.
+
+Below shows how the new method should look
+
+```ruby
+def new
+  @question = @poll.questions.build
+  @question.possible_answers.build
+end
+```
+Keep in mind that there only a single available possible_answer
+provided
+
+Note: When working with haml or any view rendering framework like plain old rails syntax: remember to review output syntax like ```=```, ```<%= %>``` vs ```-```, ```<%%>```. I spent a couple of hours trying to figure out if the model layer was not configured properly but it was actually a view syntax error that was not catch by rails.   
