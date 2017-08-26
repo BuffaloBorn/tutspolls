@@ -18,8 +18,8 @@
         =f.radio_button :kind, option[1]
         =option[0]
   %p
-    = fields_for :possible_answers do |c|
-      =c.text_field :title
+    = f.fields_for :possible_answers do |c|
+      %p
+        =c.text_field :title, class:"form-control", placeholder:"Enter a possible answer here" if c.object.id.nil? 
 
-  %p
     = f.submit 'Save', class: "btn btn-primary"

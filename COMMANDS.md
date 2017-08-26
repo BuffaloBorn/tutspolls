@@ -273,3 +273,22 @@ Keep in mind that there only a single available possible_answer
 provided
 
 Note: When working with haml or any view rendering framework like plain old rails syntax: remember to review output syntax like ```=```, ```<%= %>``` vs ```-```, ```<%%>```. I spent a couple of hours trying to figure out if the model layer was not configured properly but it was actually a view syntax error that was not catch by rails.   
+
+There was an issue when rendering the following code from the _app/controller/question_comtroller.rb_
+
+```ruby
+def new
+   @question = @poll.questions.build
+   5.times {@question.possible_answers.build}
+end
+```
+
+Inside the _app/views/questions/&#95;form.html.haml_, include the following code because it wasn't showing all the text_fields that map to the 5 possible answers craeted in the new method above
+
+```ruby
+=c.text_field :title,
+         class:"form-control",
+   placeholder:"Enter a possible answer here"
+   if c.object.id.nil?
+```
+Base on following [StackOverflow post](https://stackoverflow.com/questions/14884704/how-to-get-rails-build-and-fields-for-to-create-only-a-new-record-and-not-includ)

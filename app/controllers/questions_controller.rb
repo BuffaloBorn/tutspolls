@@ -11,8 +11,8 @@ class QuestionsController < ApplicationController
   end
 
   def new
-    @question = @poll.questions.build
-    @question.possible_answers.build
+     @question = @poll.questions.build
+     5.times {@question.possible_answers.build}
   end
 
   def edit
