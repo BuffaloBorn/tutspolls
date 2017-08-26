@@ -154,7 +154,7 @@ but a hidden field like so
 
 But if you inspect the code in the browser, it doesn't have a value for the hidden_field
 
-Remember the _/app/controller/questions_controller.rb_ has a new method that
+Remember the _/app/controllers/questions_controller.rb_ has a new method that
 
 ```ruby
 def new
@@ -189,7 +189,7 @@ It we look closely, we do not need Poll object on tis page at all because we hav
 = f.hidden_field :poll
 ```
 
-Now that we look that the _app/views/questions/&#95;forms.html.haml_, we can see that entering a kind does not provide good user experience and we should convert it to radio buttons instead. Inside the _app/controller/questions_controller.rb_, we going to add the following:
+Now that we look that the _app/views/questions/&#95;forms.html.haml_, we can see that entering a kind does not provide good user experience and we should convert it to radio buttons instead. Inside the _app/controllers/questions_controller.rb_, we going to add the following:
 
 ```ruby
 ....
@@ -259,7 +259,7 @@ This allow us to define fields for associated models
 
 So if we render this page, it will not display anything because there isn't any possible answers available to this question.
 
-We need to go to _app/controller/question_contoller.rb_ and make sure in new method that there is a possible_answer available to render for all new questions.
+We need to go to _app/controllers/question_contoller.rb_ and make sure in new method that there is a possible_answer available to render for all new questions.
 
 Below shows how the new method should look
 
@@ -274,7 +274,7 @@ provided
 
 Note: When working with haml or any view rendering framework like plain old rails syntax: remember to review output syntax like ```=```, ```<%= %>``` vs ```-```, ```<%%>```. I spent a couple of hours trying to figure out if the model layer was not configured properly but it was actually a view syntax error that was not catch by rails.   
 
-There was an issue when rendering the following code from the _app/controller/question_comtroller.rb_
+There was an issue when rendering the following code from the _app/controllers/question_comtroller.rb_
 
 ```ruby
 def new
@@ -283,7 +283,7 @@ def new
 end
 ```
 
-Inside the _app/views/questions/&#95;form.html.haml_, include the following code because it wasn't showing all the text_fields that map to the 5 possible answers craeted in the new method above
+Inside the _app/views/questions/&#95;form.html.haml_, include the following code because it wasn't showing all the text_fields that map to the 5 possible answers created in the new method above
 
 ```ruby
 =c.text_field :title,
@@ -292,3 +292,62 @@ Inside the _app/views/questions/&#95;form.html.haml_, include the following code
    if c.object.id.nil?
 ```
 Base on following [StackOverflow post](https://stackoverflow.com/questions/14884704/how-to-get-rails-build-and-fields-for-to-create-only-a-new-record-and-not-includ)
+
+This may be a new change in Rails 5 (5.1.3 current version for this application); need to review the [Ruby on Rais Guides](http://guides.rubyonrails.org/)
+
+Currently, we have 5 possible answers but we may not use all of them when submitting  to the controller but it will send whatever is in the post payload. To fix this, we need to add the following code to the _app/models/questions.rb_ model.
+
+```ruby
+accepts_nested_attributes_for :possible_answers, reject_if: proc { |attributes| attributes['title'].blank? }
+```
+A proc allows us to have conditions that are extremely complex, the proc block will be evaluate for each set of attributes that is sent over to the controller. In our case, the any attributes contains a 'title' that is blank will be rejected
+
+After clicking the 'save' button, everything looks good but it isn't.
+
+Let's look at the log
+```
+Started POST "/polls/1/questions" for 127.0.0.1 at 2017-08-26 14:15:17 -0400
+Processing by QuestionsController#create as HTML
+  Parameters: {"utf8"=>"✓", "authenticity_token"=>"O4FpatbaXoGBh0b7avXrqWHEeu/itjs5LPn+QBn36BE+eCK0YfSejKmehGLlzrp10YxLYHRrC+a/TSpjjxuqPg==", "question"=>{"title"=>"What is language do you use the most?", "kind"=>"choice", "possible_answers_attributes"=>{"0"=>{"title"=>"Ruby"}, "1"=>{"title"=>"Python"}, "2"=>{"title"=>""}, "3"=>{"title"=>""}, "4"=>{"title"=>""}}}, "commit"=>"Save", "poll_id"=>"1"}
+  [1m[36mPoll Load (1.0ms)[0m  [1m[34mSELECT  "polls".* FROM "polls" WHERE "polls"."id" = ? LIMIT ?[0m  [["id", 1], ["LIMIT", 1]]
+> Unpermitted parameter: :possible_answers_attributes
+  [1m[35m (0.0ms)[0m  [1m[36mbegin transaction[0m
+  [1m[35mSQL (5.6ms)[0m  [1m[32mINSERT INTO "questions" ("title", "kind", "created_at", "updated_at", "poll_id") VALUES (?, ?, ?, ?, ?)[0m  [["title", "What is language do you use the most?"], ["kind", "choice"], ["created_at", "2017-08-26 18:15:18.114030"], ["updated_at", "2017-08-26 18:15:18.114030"], ["poll_id", 1]]
+```
+We tell the _app/controllers/questions_controller.rb_ accept the parameters from possible_answers but we must include hash of all the parameters that possible_answers can include as well.
+
+```ruby
+  def question_params
+      params.require(:question).permit(:poll_id, :title, :kind, { possible_answers_attributes: [ :question_id, :title ] } )
+  end
+```
+Now we look at the log
+```
+Started POST "/polls/1/questions" for 127.0.0.1 at 2017-08-26 14:45:21 -0400
+Processing by QuestionsController#create as HTML
+  Parameters: {"utf8"=>"✓", "authenticity_token"=>"BgytuE8E+WWqPPrCBPEz8jbrI9zN6i+P6srx/EkMTgXgw9wJf/f7m6AO41BmWl78vHZt1SZ1ZS4i3730hid/wA==", "question"=>{"title"=>"What is the best programming language do you use the most?", "kind"=>"choice", "possible_answers_attributes"=>{"0"=>{"title"=>"Ruby"}, "1"=>{"title"=>"Javascript"}, "2"=>{"title"=>""}, "3"=>{"title"=>""}, "4"=>{"title"=>""}}}, "commit"=>"Save", "poll_id"=>"1"}
+  [1m[36mPoll Load (1.0ms)[0m  [1m[34mSELECT  "polls".* FROM "polls" WHERE "polls"."id" = ? LIMIT ?[0m  [["id", 1], ["LIMIT", 1]]
+  [1m[35m (0.0ms)[0m  [1m[36mbegin transaction[0m
+  [1m[35mSQL (2.0ms)[0m  [1m[32mINSERT INTO "questions" ("title", "kind", "created_at", "updated_at", "poll_id") VALUES (?, ?, ?, ?, ?)[0m  [["title", "What is the best programming language do you use the most?"], ["kind", "choice"], ["created_at", "2017-08-26 18:45:21.447446"], ["updated_at", "2017-08-26 18:45:21.447446"], ["poll_id", 1]]
+  [1m[35mSQL (0.0ms)[0m  [1m[32mINSERT INTO "possible_answers" ("question_id", "title", "created_at", "updated_at") VALUES (?, ?, ?, ?)[0m  [["question_id", 23], ["title", "Ruby"], ["created_at", "2017-08-26 18:45:21.454466"], ["updated_at", "2017-08-26 18:45:21.454466"]]
+>  [1m[35mSQL (0.0ms)[0m  [1m[32mINSERT INTO   "possible_answers" ("question_id", "title", "created_at",  "updated_at") VALUES (?, ?, ?, ?)[0m  [["question_id",  23], ["title", "Javascript"], ["created_at", "2017-08-26  18:45:21.458473"], ["updated_at", "2017-08-26 18:45:21.458473"]]
+  [1m[35m (5.5ms)[0m  [1m[36mcommit transaction[0m
+Redirected to http://localhost:3000/polls/1
+Completed 302 Found in 36ms (ActiveRecord: 8.5ms)
+```
+As you can see, we have 3 SQL statement with one of them inserting into possible_answers to table. Now everything is working fine.
+
+Next, we would like to show these possible answers on the management section.
+
+Let's go to the _app/views/polls/show.html.haml_, add the following code to display the possible answers with questions in one place.
+
+```ruby
+%h2 Questions
+
+%ul
+  -@poll.questions.each  do |question|
+    %li=question.title
+    %ul
+      -question.possible_answers.each do |possible_answer|
+        %li=possible_answer.title
+```

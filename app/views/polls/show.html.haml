@@ -10,3 +10,6 @@
 %ul
   -@poll.questions.each  do |question|
     %li=question.title
+    %ul
+      -question.possible_answers.each do |possible_answer|
+        %li=possible_answer.title
