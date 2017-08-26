@@ -6,7 +6,9 @@
     = csrf_meta_tags
     = stylesheet_link_tag    'application', media: 'all', 'data-turbolinks-track': 'reload'
     = javascript_include_tag 'application', 'data-turbolinks-track': 'reload'
-  %body
-    = render "nav"
+    %body
+    =render 'nav'
     .container
-      = yield
+      =content_tag :div, flash[:notice], class: "flash bg-success" if flash[:notice]
+      =content_tag :div, flash[:alert], class: "flash bg-danger" if flash[:alert]
+      =yield

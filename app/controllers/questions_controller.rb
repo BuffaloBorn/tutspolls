@@ -1,6 +1,7 @@
 class QuestionsController < ApplicationController
   before_action :set_question, only: [:show, :edit, :update, :destroy]
   before_action :set_poll
+  before_action :set_kind_questions
 
   def index
     @questions = Question.all
@@ -11,17 +12,18 @@ class QuestionsController < ApplicationController
 
   def new
     @question = @poll.questions.build
+    @question.save
   end
 
   def edit
   end
 
   def create
-    @question = Question.new(question_params)
+    @question = @poll.questions.build(question_params)
 
     respond_to do |format|
       if @question.save
-        format.html { redirect_to @question, notice: 'Question was successfully created.' }
+        format.html { redirect_to @poll, notice: 'Question was successfully created.' }
         format.json { render :show, status: :created, location: @question }
       else
         format.html { render :new }
@@ -33,7 +35,7 @@ class QuestionsController < ApplicationController
   def update
     respond_to do |format|
       if @question.update(question_params)
-        format.html { redirect_to @question, notice: 'Question was successfully updated.' }
+        format.html { redirect_to @poll, notice: 'Question was successfully updated.' }
         format.json { render :show, status: :ok, location: @question }
       else
         format.html { render :edit }
@@ -45,7 +47,7 @@ class QuestionsController < ApplicationController
   def destroy
     @question.destroy
     respond_to do |format|
-      format.html { redirect_to questions_url, notice: 'Question was successfully destroyed.' }
+      format.html { redirect_to @poll, notice: 'Question was successfully destroyed.' }
       format.json { head :no_content }
     end
   end
@@ -61,5 +63,12 @@ class QuestionsController < ApplicationController
 
     def set_poll
       @poll = Poll.find params[:poll_id]
+    end
+
+    def set_kind_questions
+      @kind_options = [
+        ["Open Answers", "open"],
+        ["Multiple Choice", "choice"]
+      ]
     end
 end

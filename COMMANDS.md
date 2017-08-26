@@ -188,3 +188,49 @@ It we look closely, we do not need Poll object on tis page at all because we hav
 = f.label :poll
 = f.hidden_field :poll
 ```
+
+Now that we look that the _app/views/questions/&#95;forms.html.haml_, we can see that entering a kind does not provide good user experience and we should convert it to radio buttons instead. Inside the _app/controller/questions_controller.rb_, we going to add the following:
+
+```ruby
+....
+  before_action :set_kind_questions
+....
+
+private
+
+  def set_kind_questions
+
+  end
+```
+This will be called on every method for now but we can provide whitelist(include) of methods that should only be called on  
+
+Here is a question you may ask yourself, in which ```poll``` is the ```question``` saved to?
+
+Check out _log/development.log_,
+
+```ruby
+Started POST "/polls/1/questions" for 127.0.0.1 at 2017-08-25 15:28:49 -0400
+Processing by QuestionsController#create as HTML
+Parameters: {"utf8"=>"✓", "authenticity_token"=>"gxWBgAzyDCiEFRYwhE8Tg+NN8kvLkWMY1zDR2sIAV+GbN/wAdbRFlN8EswUNG1CkyGYeYbgw1mGQoG36DiclbA==", "question"=>{"title"=>"What is your name?", "kind"=>"open"}, "commit"=>"Save", "poll_id"=>"1", "id"=>"1"}
+[1m[35mSQL (0.0ms)[0m  [1m[32mINSERT INTO "questions" ("created_at",  "kind","title","updated_at",) VALUES (?, ?, ?,?)[0m  [["created_at", "2017-08-25 19:28:40.944194"] ,["kind", "open"],["title","What is your name?"],["updated_at", "2017-08-25 19:28:40.944194"]]
+```
+As you can see, we have the all parameters passed into the controller as ```POST``` action but it is not inserted in the SQL statement when the SQL is constructed by ActiveRecord call.  
+
+The issue lays within the _app/contoller/questions_controller.rb_, inside the create method.
+
+```ruby
+def create
+    @question = Question.new(question_params)
+    ...
+end
+```
+needs to use the following syntax as te new method
+```ruby
+def create
+      @question = @poll.questions.build(question_params)
+    ...
+end
+```
+Make sure pay attention to ```question_params``` method is defined in the private section
+
+This is a rails way of restricting a particular dataset that is coming from the outside.

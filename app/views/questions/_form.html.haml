@@ -6,11 +6,16 @@
         - @question.errors.full_messages.each do |message|
           %li= message
 
-  .field
+  %p
     = f.label :title
     = f.text_field :title, class: "form-control"
-  .field
+
+  %p
     = f.label :kind
-    = f.text_field :kind , class: "form-control"
-  .actions
+  .radio
+    -@kind_options.each do |option|
+      %label
+        =f.radio_button :kind, option[1]
+        =option[0]
+  %p
     = f.submit 'Save', class: "btn btn-primary"
