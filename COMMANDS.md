@@ -470,4 +470,27 @@ has_many :replies
 
 Now we can focus on the view, start looping the answers even though we do not have any answers but we need to go in the replies controller and create answers base on each questions in a given poll.
 
-The rest of the this section will be base on the view portion of the MVC model
+The rest of the this section will be base on the ```view``` portion of the MVC model
+
+```ruby
+=c.label :value, c.object.questio.title
+=c.text_field :value, class:"form-control"
+```
+to make more dynamic for different kinds of questions
+
+```ruby
+=render c.object.question.kind, c: c
+```
+Remember that the ```c: c``` variable being passed to each partial that is rendered by section
+
+Let go to rails console to make sure that there isn&#39;t a nil value for kind. Below  are steps way to resolve any records that may contain a nil for kind
+
+```bash
+$ rails console
+```
+```ruby
+> Question.all
+> Question.last
+> Question.last.update :kind "choice"
+```
+At this point we do have any makup for the  _app/views/replies/_choice.html.haml_ partial
