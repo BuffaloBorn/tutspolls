@@ -3,5 +3,5 @@ class Poll < ApplicationRecord
 
   # Relationships
   has_many :questions
-
+  has_many :replies
 end

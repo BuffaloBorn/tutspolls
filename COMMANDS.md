@@ -425,3 +425,49 @@ def reply_params
   params.require(:reply).permit({:poll_id answers_attributes: [ :value, :question_id, :reply_id, :possible_answer_id ] })
 end
 ```
+
+Now we need to modify _app/models/reply.rb_, make sure it has access to many answers and it can access to nested attributes from answers as well.
+
+```ruby
+class Reply < ApplicationRecord
+  belongs_to :poll
+  has_many :answers
+
+  accepts_nested_attributes_for :answers
+end
+```
+
+In addition, we need to go to _app/models/question.rb_, make sure we tell questions that it has many answers by adding this below:
+
+```ruby
+  has_many :answers
+```
+
+By adding this to questions it useful later to gather useful statistics.
+
+It time to modify the view to access the new answers features.
+
+Create _app/views/replies/new.html.haml_, review the code that was added inside
+
+Next we need to modify _app/views/polls/index.html.haml_ to include the following link:
+
+```ruby
+= link_to 'Answer', new_poll_reply_path(poll), class: "btn btn-default"
+```
+
+this will allow his access the replies_controller&#39;s new method. If we click on the Answer button, it will generate the following error:
+
+```ruby
+NoMethodError at /polls/1/replies/new
+undefined method `replies' for #<Poll:0x0000000e9a9c88>
+```
+
+We need to go to the _app/models/poll.rb_ and add code:
+
+```ruby
+has_many :replies
+```
+
+Now we can focus on the view, start looping the answers even though we do not have any answers but we need to go in the replies controller and create answers base on each questions in a given poll.
+
+The rest of the this section will be base on the view portion of the MVC model
