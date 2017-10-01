@@ -1,8 +1,9 @@
-%label=c.object.question.title
+%p
+  =c.label :value, c.object.question.title
 .radio
   -c.object.question.possible_answers.each do |possible_answer|
     %p
-      %label.col-lg-4
-        =possible_answer.title.strip
-        =c.radio_button :possible_answer_id, possible_answer.id, class: "col-lg-2"
+      %label
+        =c.radio_button :possible_answer_id, possible_answer.id
+        =possible_answer.title
         =c.hidden_field :question_id

@@ -361,7 +361,7 @@ Interesting CSV rake task from [stackoverflow](https://stackoverflow.com/questio
 
 Now it time to go to the next level and allow the users to reply back to a poll.
 
-Reply need to be referenced to a poll, question and possible answer. Refer back 1.3 Defining the Business Model.
+A reply needs to be referenced to a poll, question and possible answer. Refer back 1.3 Defining the Business Model.
 
 ```bash
 $ rails g model reply poll:references
@@ -378,6 +378,10 @@ $ rake db:migrate
 Next its time to create the necessary forms to allow us to create relies and answers. First we'll craft a controller by hand; we could of done it with the scaffold generator but it would create extra files that we do not need right now. Create a file named: _app/controller/replies&#96;controller.rb_
 
 Refer to class created above
+
+With the _app/controller/replies&#96;controller.rb_, we need to have a _new_ and _create_ method.
+
+In the _new_, we need to make sure that we have reference to the poll object and that can be established by finding the poll via the _poll&#96;id_ from the parameters passed to this controller and the we can  start building a reply object in memory.
 
 Now we need to update _config/routes.rb_, it should now look this
 ```ruby
@@ -417,14 +421,26 @@ Here is the list of available routes:
                                        P A T C H     / p o l l s / : i d ( . : f o r m a t )                                                   p o l l s # u p d a t e  
                                        P U T         / p o l l s / : i d ( . : f o r m a t )                                                   p o l l s # u p d a t e  
                                        D E L E T E   / p o l l s / : i d ( . : f o r m a t )                                                   p o l l s # d e s t r o y  
- ```
-In the reply_params method, we have to make sure we place all the params that can be submitted to replies controller are included even they are need used in every request.  
+
+```
+
+Above we've just double checking if we have the two new routes that we can reference:
+
+new&#96;poll&#96;reply and poll&#96;replies
+
+In our _create_ method, we need to establish a new _@reply_ instance variable that is created from the _@poll.replies.build_ operation from there we can attempt to save our newly constructed _@reply_ instance variable that is constructed with the _:reply_ parameter and then redirected to the actual poll that we've found earlier plus we can populate the _notice_ buffer or we'll render a new reply page.
+
+Before the _create_ method creates a poll, we need to found a poll with the poll_id passed into the controller.
+
+We need to create _reply_params_ method, that will be ```private```, we have to make sure we place all the params that can be submitted to the replies controller in a single location so that we can centralize this reference without the controller; we need to included all possible params even if they are not used in any method sections.  
 
 ```ruby
 def reply_params
-  params.require(:reply).permit({:poll_id answers_attributes: [ :value, :question_id, :reply_id, :possible_answer_id ] })
+  params.require(:reply).permit(:poll_id, {answers_attributes: [ :value, :question_id, :reply_id, :possible_answer_id ] })
 end
 ```
+
+Recall, that   ```answers_attributes: [ :value, :question_id, :reply_id, :possible_answer_id ] ``` is a hash that passes the answers parameters that is nested with the controller request.
 
 Now we need to modify _app/models/reply.rb_, make sure it has access to many answers and it can access to nested attributes from answers as well.
 
@@ -437,13 +453,13 @@ class Reply < ApplicationRecord
 end
 ```
 
-In addition, we need to go to _app/models/question.rb_, make sure we tell questions that it has many answers by adding this below:
+In addition, we need to go to _app/models/question.rb_, make sure we tell questions that it may have many answers by adding this below:
 
 ```ruby
   has_many :answers
 ```
 
-By adding this to questions it useful later to gather useful statistics.
+By adding this to _app/models/question.rb_ it useful later to gather useful statistics. It seems that this completes all the changes that we need for the controllers and models level.
 
 It time to modify the view to access the new answers features.
 
@@ -462,11 +478,26 @@ NoMethodError at /polls/1/replies/new
 undefined method `replies' for #<Poll:0x0000000e9a9c88>
 ```
 
+The above error was fixed after reviewing the controller and model classes adding the needed references.  
+
 We need to go to the _app/models/poll.rb_ and add code:
 
 ```ruby
 has_many :replies
 ```
+Because the ```@reply``` object was not saving and it was falling into the else block in the create method. To debug this, added ```raise &#39;something&#39;```  to that else block and run the following code at the console.
+
+```bash
+@reply.errors.full_messages
+=> ["Answers possible answer must exist"]
+```
+And discovered the following message above. It lead to google search to [stackoverflow](https://stackoverflow.com/questions/40276008/form-with-nested-attributes-not-saving-rails-5)
+
+Rails 5 association belongs to failed validate your [associated] id, so your entry is getting rollback.
+
+This informed me to check out the _app/models/answer.rb_ and add ```optional: true``` to ```belongs_to :possible_answer``` so it looks like ```belongs_to :possible_answer, optional: true```
+
+This now gives us the results we are looking for.
 
 Now we can focus on the view, start looping the answers even though we do not have any answers but we need to go in the replies controller and create answers base on each questions in a given poll.
 
@@ -483,7 +514,7 @@ to make more dynamic for different kinds of questions
 ```
 Remember that the ```c: c``` variable being passed to each partial that is rendered by section
 
-Let go to rails console to make sure that there isn&#39;t a nil value for kind. Below  are steps way to resolve any records that may contain a nil for kind
+Let go to rails console to make sure that there is not a nil value for kind. Below are steps way to resolve any records that may contain a nil for kind
 
 ```bash
 $ rails console
@@ -494,3 +525,43 @@ $ rails console
 > Question.last.update :kind "choice"
 ```
 At this point we do have any makup for the  _app/views/replies/_choice.html.haml_ partial
+
+## 2.5 Display Reply Data
+
+Let review what we have done so far.
+
+We listing all the polls and each poll have a question with it perspective possible answers. Plus know how to answer a particular type of poll.
+
+Now we going to the details of a poll and list all answers that have been all ready provide for a poll. This is the point where we start to gather intelligence about a panel.
+
+Go _app/views/polls/show.html.haml_, append the following above the established links
+
+```ruby
+-@poll.replies.each do |reply|
+  .col-md-6
+    .panel.panel-default
+      .panel-heading.text-right
+        =time_ago_in_words reply.created_at
+      .panel-body
+        %dl
+          -reply.answers.each do |answer|
+            %dt=answer.question.title
+            %dd
+              =answer.value.present? ? answer.value : answer.possible_answer.title
+
+
+As we review the additional narkup add in this section, we see that we have created the following stucture:
+
+.col-md-6 -> 6 column division
+  .panel.panel-default -> panel section
+    .panel-heading.text-right -> header that is aligned to the right
+          =time_ago_in_words reply.created_at -> simplely display time the poll was tooken and created
+        .panel-body -> a body for that panel
+          %dl -> definition list
+            -reply.answers.each do |answer|
+              %dt=answer.question.title
+              %dd
+                =answer.value.present? ? answer.value : answer.possible_answer.title
+
+The idea being that the term-to-be-defined is held in the <dt> element, and the definition of that term is given in the <dd>.
+```
