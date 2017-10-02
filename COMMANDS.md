@@ -548,10 +548,11 @@ Go _app/views/polls/show.html.haml_, append the following above the established 
             %dt=answer.question.title
             %dd
               =answer.value.present? ? answer.value : answer.possible_answer.title
-
+```
 
 As we review the additional narkup add in this section, we see that we have created the following stucture:
 
+```haml
 .col-md-6 -> 6 column division
   .panel.panel-default -> panel section
     .panel-heading.text-right -> header that is aligned to the right
@@ -562,6 +563,41 @@ As we review the additional narkup add in this section, we see that we have crea
               %dt=answer.question.title
               %dd
                 =answer.value.present? ? answer.value : answer.possible_answer.title
+```
 
-The idea being that the term-to-be-defined is held in the <dt> element, and the definition of that term is given in the <dd>.
+The idea being that the term-to-be-defined is held in the <dt> element, and the definition of that term is given in the <dd>. We can see that the first question displays the value that we stored for the answer but for the second question we are showing the possible answer because it value we can choose from. The question is multiple choose not free form answer. This do to the fact that  ```=answer.value.present? ? answer.value : answer.possible_answer.title``` checks if we are displaying a value or a possible_answer&#39;s title.
+
+
+One thing that we can do to improve the layout is to move the button in above the new Replies header.
+
+We also going to add a tab navigation by using bootstrap standard layout from [bootstrap js](https://getbootstrap.com/docs/3.3/javascript/). Here we will see many components that relay on javascript but we only care for is [bootstrap tab](https://getbootstrap.com/docs/3.3/javascript/#tabs
+
+Here we can see that tabs that can have dropdowns or not. In our case, we are just have three tabs one for questions, one for replies and the last one for statistics. So are do not want to rely on to much javascript so we are going to use ```data-attributes```. We are listing all the tabs and provide a section of ```div```s that will have our previous content.
+
+```html
+<div>
+  <!-- Nav tabs -->
+  <ul class="nav nav-tabs" role="tablist">
+    <li role="presentation" class="active"><a href="#home" aria-controls="home" role="tab" data-toggle="tab">Home</a></li>
+    <li role="presentation"><a href="#profile" aria-controls="profile" role="tab" data-toggle="tab">Profile</a></li>
+    <li role="presentation"><a href="#messages" aria-controls="messages" role="tab" data-toggle="tab">Messages</a></li>
+    <li role="presentation"><a href="#settings" aria-controls="settings" role="tab" data-toggle="tab">Settings</a></li>
+  </ul>
+
+  <!-- Tab panes -->
+  <div class="tab-content">
+    <div role="tabpanel" class="tab-pane active" id="home">...</div>
+    <div role="tabpanel" class="tab-pane" id="profile">...</div>
+    <div role="tabpanel" class="tab-pane" id="messages">...</div>
+    <div role="tabpanel" class="tab-pane" id="settings">...</div>
+  </div>
+
+</div>
+```
+
+
+After converting the above bootstrap tab code to haml by using the aboe website and making the correct modifitions to fit what we are looking for. To make the tabs work properly we need to add the below bootstrap js reference in ```app/views/layouts/application.html.erb```
+
+```javascript
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
 ```
