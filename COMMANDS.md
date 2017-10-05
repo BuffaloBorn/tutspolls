@@ -601,3 +601,96 @@ After converting the above bootstrap tab code to haml by using the aboe website 
 ```javascript
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
 ```
+
+## 3.1 Polls Taken Over Time_ Gathering Data
+
+Up until now, we have provided users the means to defined a set polls with questions and possible answers thay can take.
+
+We also given the user a chance to take to reply to the poll answer with each question that is apart the poll in which is related to a reply object.
+
+Now we will focus on the statistics aspect of the data collected of each poll. We will provide a meanful visalize of that data.
+
+We are going to take a different approuch and create our poll serializer.  THis will be place in a class that will have two methods; one for each question that was developed earlier lessons.
+
+First we are going to the test folder and create an ```unit``` folder. The ```unit``` folder is special in ruby on rails because it contaims deciated task in the rake file.
+
+Our class will be named: poll_serializer so we will create a sub-folder named: poll_serializer as well.
+
+Inside the ```poll_serializer``` folder, we will create series of test classes on for each kind of intelligence.
+
+The first one on ```count_per_month_test.rb``` and this one will on focus first question: "How many polls was taken per month?"
+
+In our ```count_per_month_test.rb``` class, we need to add
+
+```
+require "test_helper"
+```
+
+We are not going to inherit from any other rails helper class because we do not have to.
+
+```
+include FactoryGirl::Syntax::Methods
+```
+
+This will allow us to inject factories into our test. Next we will insert a series of test and will focus on one at a time.
+
+
+```
+attr_reader :poll
+
+  def setup
+    @poll = create :full_poll, replies_count: 5, questions_count: 5
+    @stats = PollSerializer.count_per_month(poll)
+  end
+
+  def test_retrieves_data_in_the_form_of_an_array
+    assert_includes @stats.keys, :data
+  end
+
+  def test_polls_per_month_have_numbers
+    assert_kind_of Numeric, @stats[:data].first
+  end
+
+  def test_polls_per_month_have_x_axis
+    assert_equal "Polls per month", @stats.fetch(:x_axis).fetch(:legend)
+  end
+
+  def test_polls_per_month_have_x_axis_series
+    assert_kind_of Array, @stats.fetch(:x_axis).fetch(:series)
+  end
+
+  def test_polls_per_month_have_x_axis_series_in_proper_format
+    assert_includes @stats.fetch(:x_axis).fetch(:series).first, Time.now.strftime("%b %Y")
+  end
+
+  def test_polls_per_month_have_y_axis
+    assert_equal "No. polls", @stats.fetch(:y_axis).fetch(:legend)
+  end
+
+  def test_polls_per_month_have_y_axis_max_range
+    assert_equal 0, @stats.fetch(:y_axis).fetch(:scale)[0]
+  end
+
+  def test_polls_per_month_have_y_axis_max_range
+    assert_equal 6, @stats.fetch(:y_axis).fetch(:scale)[1]
+  end
+
+```
+
+Here is an overview of what each of the test does:
+
+  * setup -   creates two instance variables: a poll and a PollSerializer . We are assuming that these classes exist already
+    1. for the @poll variable we are using full_poll factory that will create a set of questions and a set of replies that is associated
+    2. With the PollSerializer class there is a count_per_month method that is defined and accepts a poll as a parameter
+
+  * test_retrieves_data_in_the_form_of_an_array -we want to have a data element in the array
+  * test_polls_per_month_have_numbers - we want make sure that each element in the array is Numeric
+  * test_polls_per_month_have_x_axis - we want to make sure there is a legend for the x_axis
+  * test_polls_per_month_have_x_axis_series - we want to make sure there is an array that contain the entire series
+  * test_polls_per_month_have_x_axis_series_in_proper_format - we want make the is contains a timestamp that provides meanful visalization
+  * test_polls_per_month_have_y_axis - make sre we have legend for the y axis
+  * test_polls_per_month_have_y_axis_max_range - minumim value this provides meanful visalization
+  * test_polls_per_month_have_y_axis_max_range - maxium value thus provides meanful visalization
+      If we a have max of 5 in given month, then we should have 1 over that value.
+
+  We are going to skip all test beside the first two. 
