@@ -691,6 +691,139 @@ Here is an overview of what each of the test does:
   * test_polls_per_month_have_y_axis - make sre we have legend for the y axis
   * test_polls_per_month_have_y_axis_max_range - minumim value this provides meanful visalization
   * test_polls_per_month_have_y_axis_max_range - maxium value thus provides meanful visalization
-      If we a have max of 5 in given month, then we should have 1 over that value.
+      1. If we a have max of 5 in given month, then we should have 1 over that value.
 
-  We are going to skip all test beside the first two. 
+We are going to skip all test besides the first two.
+
+Recall that we want to assert that we have ```:data``` key within our @stats.keys object. The whole puepose of the PollSerializer class is to retieve the hash of ```data``` key. That can be parse through many different tools. One of this tools will be javascript via json object.
+
+So with in mind, we want to make sure that the ```:data``` key is available and set. So the count_per_month method will populate this key. This method will take poll that is a factory.
+
+If we were uising ```VIM``` we can create the following mapping: :nnoremap ,rs :!clear; bin/rake test:units<cr>
+
+Remember that this unit tests are available in rails. We only have one test so there is only test that is ran.
+
+Before we run ```bin/rake test:units```, we may have to execute ```bin/rails db:migrate RAILS_ENV=test```   
+
+As we thought, all the test failed because we do have that factory registed. Let create the ```test/factories.rb```. This file will contain all the factories that we need to craete our test.
+
+First we need to create a poll factory:
+
+```ruby
+FactoryGirl.define do
+  factory :poll do
+
+  end
+end
+```
+
+Let see what kind factory we need to create by reviewing the the testcase we created so far:
+
+```ruby
+def setup
+  @poll = create :full_poll, replies_count: 5, questions_count: 5
+  @stats = PollSerializer.count_per_month(poll)
+end
+```
+
+From this we can create the following factories in the ```/test/unit/factories.rb``` file
+
+```ruby
+FactoryGirl.define do
+  factory :poll do
+    title: "Factory Poll"
+  end
+end
+```
+
+But remember that we want a full poll not just a single poll. Full poll with more other object attached to it.
+
+```ruby
+FactoryGirl.define do
+  factory :poll do
+      title: "Factory Poll"
+
+      factory :full_poll do
+
+      end    
+  end
+end
+```
+
+By create a nested ```poll``` factory will cause the ```full_poll``` factory to inherit all the properties that the ```poll``` factory will provide. We want to make sure that the replies and questions are included.
+
+```ruby
+FactoryGirl.define do
+  factory :poll do
+      title: "Factory Poll"
+
+      factory :full_poll do
+        ignore do
+          replies_count 5
+          questions_count 5
+        end
+        after(:create) do |poll, evaluator|
+          create_list :full_question, evaluator.questions_count, poll: poll
+          create_list :reply, evaluator.replies_count, poll: poll
+        end
+      end    
+  end
+end
+```
+
+After we create a ```full_poll``` that we create list full_quetions via ```create_list: full_quetion``` and a create list of replies via ```create_list: reply```. We ned define these two factories plus we have the ```ignore``` block  which allows us to store different properties that are not apart of the actual poll. We can read this as 5 different replies and 5 different questions.
+
+Let's define the recent of the two factories:
+
+```ruby
+FactoryGirl.define do
+
+  factory :reply do
+  end
+
+  factory :question do
+     title "Question #"
+     kind "choice"
+
+     factory :full_question do
+       ignore do
+         answers_count 5
+         possible_answers_count 5
+       end
+
+       after(:create) do |question, evaluator|
+         create_list :answer,
+           evaluator.answers_count,
+           question: question,
+           possible_answer_id: 1
+
+         create_list :possible_answer,
+           evaluator.possible_answers_count,
+           question: question
+       end
+     end
+   end
+
+  factory :poll do
+      title: "Factory Poll"
+
+      factory :full_poll do
+        ignore do
+          replies_count 5
+          questions_count 5
+        end
+        after(:create) do |poll, evaluator|
+          create_list :full_question, evaluator.questions_count, poll: poll
+          create_list :reply, evaluator.replies_count, poll: poll
+        end
+      end    
+  end
+end
+```
+
+As we can see that kind inside question will be defaulted to ```choice```. We aslo need to define the ```full_question```
+that has its own nested models created and associated within a ```full_question```. In reviewing the ```full_question```, it will have an ```answer``` with the first ```possible_answer``` as reference and list all ```possible_answers``` will created.  
+
+By setting this up in this fashion, it allows us to easily create the test data to pass to each testcase in a way that generates the correct nested stucture.
+
+If we re-run the testsuite we will not have any errors with first portion of the ```setup``` test but ```PollSerializer``` call will. 
