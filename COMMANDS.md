@@ -993,5 +993,123 @@ The exact data we are looking for is length of the replies list within our hash.
 ```
 [2] pry(PollSerializer)> replies.map { |key,values| values.length }
 [5]
+```
+If we had more dates and more replies, we would have something like this:
 
 ```
+[2] pry(PollSerializer)> replies.map { |key,values| values.length }
+[2, 3]
+```
+
+Now we can re-run ```bin/rake test:units``` to see if we pass the previous failed test:
+
+
+```
+Run options: --seed 5547
+
+# Running:
+
+.SSS.SS
+
+Finished in 17.224557s, 0.4064 runs/s, 0.1742 assertions/s.
+7 runs, 3 assertions, 0 failures, 0 errors, 5 skips
+
+You have skipped tests. Run with --verbose for details.
+
+```
+ And yes we have two passing test.
+
+ We are going to build the hash in ```count_per_month``` step by step via each test. Next we are going to look the next test.
+
+ ```
+ def test_polls_per_month_have_x_axis
+   assert_equal "Polls per month", @stats.fetch(:x_axis).fetch(:legend)
+ end
+ ```
+
+We want want to have ```"Polls per month"``` in a section legend with x axis section within our hash.
+
+First we will run our test to see it fail.
+
+```
+Run options: --seed 31386
+
+# Running:
+
+.SSE
+
+Error:
+PollSerializerTest#test_polls_per_month_have_x_axis:
+KeyError: key not found: :x_axis
+    test/unit/poll_serializer/count_per_month_test.rb:22:in `fetch'
+    test/unit/poll_serializer/count_per_month_test.rb:22:in `test_polls_per_month_have_x_axis'
+
+bin/rails test test/unit/poll_serializer/count_per_month_test.rb:21
+
+.SS
+
+Finished in 17.671543s, 0.3961 runs/s, 0.1698 assertions/s.
+7 runs, 3 assertions, 0 failures, 1 errors, 4 skips
+
+You have skipped tests. Run with --verbose for details.
+```
+
+ As we can see that key is not found. Now we add the need need code block:
+
+ ```
+ def self.count_per_month poll
+   replies = poll.replies.group_by { |reply| reply.created_at.beginning_of_month }
+   data = replies.map { |key,values| values.length }
+   {
+     data: data,
+     x_axis: {
+      legend: "Polls per month"
+      }
+   }
+ end
+ ```
+
+ Now we can re-run ```bin/rake test:units``` to see if we pass the previous failed test:
+
+ ```
+ Run options: --seed 20103
+
+ # Running:
+
+ SS.SS..
+
+ Finished in 27.265653s, 0.2567 runs/s, 0.1467 assertions/s.
+ 7 runs, 4 assertions, 0 failures, 0 errors, 4 skips
+
+ You have skipped tests. Run with --verbose for details.
+ ```
+
+Now we are going to fast-forward and uncomment the rest of the test. We completed the hash with more information. We wanted ```title```, ```series``` for the ```x_axis``` and ```legend``` plus a ```scale``` for the ```y_axis```. The ```scale``` is used to allow us to define bounties for te amount data that we have; where start from 0 to ```data.max``` plus 1 to add a little margin. Below are  needed code block so that we can  pass the rest of the test:
+
+```ruby
+{
+        data: data,
+        title: "Polls answered by month",
+        x_axis: {
+          legend: "Polls per month",
+          series: polls_per_month.keys.map { |date| date.strftime("%b %Y") }
+        },
+        y_axis: {
+          legend: "No. polls",
+          scale: [0, data.max + 1]
+        }
+}
+
+```
+ Now we can re-run ```bin/rake test:units``` to see if we pass the previous failed test:
+
+ ```un options: --seed 8709
+
+# Running:
+
+.......
+
+Finished in 13.979463s, 0.5007 runs/s, 0.6438 assertions/s.
+7 runs, 9 assertions, 0 failures, 0 errors, 0 skips
+
+ ```

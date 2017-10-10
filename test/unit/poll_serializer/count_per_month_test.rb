@@ -19,32 +19,26 @@ class PollSerializerTest < MiniTest::Test
   end
 
   def test_polls_per_month_have_x_axis
-    skip
     assert_equal "Polls per month", @stats.fetch(:x_axis).fetch(:legend)
   end
 
   def test_polls_per_month_have_x_axis_series
-    skip
    assert_kind_of Array, @stats.fetch(:x_axis).fetch(:series)
   end
 
   def test_polls_per_month_have_x_axis_series_in_proper_format
-    skip
     assert_includes @stats.fetch(:x_axis).fetch(:series).first, Time.now.strftime("%b %Y")
   end
 
   def test_polls_per_month_have_y_axis
-    skip
    assert_equal "No. polls", @stats.fetch(:y_axis).fetch(:legend)
   end
 
   def test_polls_per_month_have_y_axis_max_range
-    skip
    assert_equal 0, @stats.fetch(:y_axis).fetch(:scale)[0]
   end
 
   def test_polls_per_month_have_y_axis_max_range
-    skip
     assert_equal 6, @stats.fetch(:y_axis).fetch(:scale)[1]
   end
 
