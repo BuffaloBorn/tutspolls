@@ -15,7 +15,6 @@ class PollSerializerTest < MiniTest::Test
   end
 
   def test_polls_per_month_have_numbers
-    skip
     assert_kind_of Numeric, @stats[:data].first
   end
 

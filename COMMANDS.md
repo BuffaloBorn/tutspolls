@@ -883,20 +883,115 @@ factory :answer do
 end
 ```
 
-Now we have the test factory working, we can start to focus on the other test that we've ```skip ```
+Now we have the test factory working, we can start to focus on the other test that we've ```skip ```; starting
+
+```ruby
+def test_polls_per_month_have_numbers
+  assert_kind_of Numeric, @stats[:data].first
+end
+```
+Here the results:
 
 ```
-Error:
-PollSerializerTest#test_polls_per_month_have_numbers:
-NoMethodError: undefined method `first' for nil:NilClass
-    test/unit/poll_serializer/count_per_month_test.rb:18:in `test_polls_per_month_have_numbers'
+# Running:
+
+SSSS.SF
+
+Failure:
+PollSerializerTest#test_polls_per_month_have_numbers [C:/Users/camcgruder/git/tutspolls/test/unit/poll_serializer/count_per_month_test.rb:18]:
+Expected nil to be a kind of Numeric, not NilClass.
 
 bin/rails test test/unit/poll_serializer/count_per_month_test.rb:17
 
-SSSSS
 
-Finished in 14.635208s, 0.5466 runs/s, 0.1367 assertions/s.
-8 runs, 2 assertions, 0 failures, 1 errors, 6 skips
+
+Finished in 12.988378s, 0.5389 runs/s, 0.2310 assertions/s.
+7 runs, 3 assertions, 1 failures, 0 errors, 5 skips
 
 You have skipped tests. Run with --verbose for details.
+
+```
+
+So we go to ```test/unit/poll_serializer/count_per_month_test.rb```, remove the ```skip```  on  ```test_polls_per_month_have_numbers``` test
+but will also change ```app/lib/poll_serializer.rb```
+
+```ruby
+def self.count_per_month poll
+  {
+    data: nil
+  }
+end
+
+```
+
+to
+
+```ruby
+def self.count_per_month poll
+  {
+    data: []
+  }
+end
+```
+
+Let re-run but get an error on that test.  We asseted to have a number but we got nil because the first item does not exist.  
+
+```
+Run options: --seed 3993
+
+# Running:
+
+SSF
+
+Failure:
+PollSerializerTest#test_polls_per_month_have_numbers [C:/Users/camcgruder/git/tutspolls/test/unit/poll_serializer/count_per_month_test.rb:18]:
+Expected nil to be a kind of Numeric, not NilClass.
+
+bin/rails test test/unit/poll_serializer/count_per_month_test.rb:17
+
+SSS.
+
+Finished in 12.361710s, 0.5663 runs/s, 0.2427 assertions/s.
+7 runs, 3 assertions, 1 failures, 0 errors, 5 skips
+
+You have skipped tests. Run with --verbose for details.
+```
+
+Now we will add the following, where we want to group all our replies by month before returning the data object. We need to transform this grouped replies  so we have count for each one of them. We can use ```binding.pry``` to see  So we add the this to the count_per_month_test method:
+
+```
+replies = poll.replies.group_by { |reply|
+reply.created_at.beginning_of_month }
+
+```
+
+Now we can run ```bin/rake test:units``` to see what the replies look like:
+
+```
+Run options: --seed 26704
+
+# Running:
+
+
+From: C:/Users/camcgruder/git/tutspolls/app/lib/poll_serializer.rb @ line 5 PollSerializer.count_per_month:
+
+    3: def self.count_per_month poll
+    4:   replies = poll.replies.group_by { |reply| reply.created_at.beginning_of_month }
+ => 5:   binding.pry
+    6:   {
+    7:     data: []
+    8:   }
+    9: end
+[1] pry(PollSerializer)> replies
+{list replies}
+```
+
+Here we have a hash with the time object as the key followed by list of all the replies. We should have 5 of them base on what we supplied to factory parameter.  
+
+The exact data we are looking for is length of the replies list within our hash. We can get the information by using the following code block:
+
+```
+[2] pry(PollSerializer)> replies.map { |key,values| values.length }
+[5]
+
 ```
