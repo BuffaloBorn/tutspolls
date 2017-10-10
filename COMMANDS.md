@@ -826,4 +826,77 @@ that has its own nested models created and associated within a ```full_question`
 
 By setting this up in this fashion, it allows us to easily create the test data to pass to each testcase in a way that generates the correct nested stucture.
 
-If we re-run the testsuite we will not have any errors with first portion of the ```setup``` test but ```PollSerializer``` call will. 
+If we re-run the testsuite we will not have any errors with first portion of the ```setup``` test but ```PollSerializer``` class reference will cause issue because it is not defined, yet.
+
+Now we can we re-test ```test/unit/poll_serializer/count_per_month_test.rb```, again test should fail on the    ```PollSerializer``` class and that is our next focus.
+
+We will need to create a file in ```app/lib/poll_serializer.rb```, let's re-run the test again by executing ```bin/rails test test/unit/poll_serializer/count_per_month_test.rb```
+
+But this time we test utilies suite can't found the new file that we just added, so we need to tell rails where to look for this file.
+
+ Lets go to ```config/application.rb``` and the following at the bottom after the last config entry:
+
+ ```
+config.autoload_paths += %W(#{config.root}/app/lib)
+ ```  
+
+ This allows us to include additional configurations into the ```config.autoload_paths``` variable. We can read this a single array with a reference to the appplication path with app/lib also included.
+
+Let's re-run the test again by executing ```bin/rails test test/unit/poll_serializer/count_per_month_test.rb``` or  ```bin/rake test:units```
+
+We may have to reset the test db by issuing the following rake task:
+
+```bash
+$ bin/rake db:drop:_unsafe RAILS_ENV=test
+$ bin/rake db:create RAILS_ENV=test
+$ bin/rails db:migrate RAILS_ENV=test
+```
+
+The above peice didn't fix the issue with ```test/factories.rb``` from running properly.
+
+After reviewing the [factoryGirl](https://thoughtbot.com/upcase/videos/factory-girl) Weekly Iterations, the maintainer mention that in the newer versions that you have to tell each factory create a especilly with associations that it must reference another or we will see the following errors:
+
+```bash
+ActiveRecord::RecordInvalid: Validation failed: Reply must exist, possible_answer must exist
+```
+
+After applying the the factory references to associated factory everything is
+
+```ruby
+factory :reply do
+end
+
+factory :answer do
+end
+```
+
+to
+
+```ruby
+factory :reply do
+  poll
+end
+
+factory :answer do
+  possible_answer
+  reply
+end
+```
+
+Now we have the test factory working, we can start to focus on the other test that we've ```skip ```
+
+```
+Error:
+PollSerializerTest#test_polls_per_month_have_numbers:
+NoMethodError: undefined method `first' for nil:NilClass
+    test/unit/poll_serializer/count_per_month_test.rb:18:in `test_polls_per_month_have_numbers'
+
+bin/rails test test/unit/poll_serializer/count_per_month_test.rb:17
+
+SSSSS
+
+Finished in 14.635208s, 0.5466 runs/s, 0.1367 assertions/s.
+8 runs, 2 assertions, 0 failures, 1 errors, 6 skips
+
+You have skipped tests. Run with --verbose for details.
+```

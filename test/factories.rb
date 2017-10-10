@@ -1,8 +1,12 @@
 FactoryGirl.define do
-  factory :answer do
-  end
 
   factory :reply do
+    poll
+  end
+
+  factory :answer do
+    possible_answer
+    reply
   end
 
   factory :possible_answer do
@@ -14,20 +18,14 @@ FactoryGirl.define do
     kind "choice"
 
     factory :full_question do
-      ignore do
+      transient do
         answers_count 5
         possible_answers_count 5
       end
 
       after(:create) do |question, evaluator|
-        create_list :answer,
-          evaluator.answers_count,
-          question: question,
-          possible_answer_id: 1
-
-        create_list :possible_answer,
-          evaluator.possible_answers_count,
-          question: question
+        create_list :possible_answer, evaluator.possible_answers_count, question: question
+        create_list :answer, evaluator.answers_count, question: question, possible_answer_id: 1
       end
     end
   end
@@ -37,7 +35,7 @@ FactoryGirl.define do
 
     factory :full_poll do
 
-      ignore do
+      transient do
         replies_count 5
         questions_count 5
       end
