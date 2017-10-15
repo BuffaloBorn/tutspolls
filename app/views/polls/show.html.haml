@@ -4,13 +4,13 @@
   / Nav tabs
   %ul.nav.nav-tabs
     %li.active
-      =link_to "Questions", "tab-questions", data: {toggle: "tab" }
+      =link_to "Questions", "#tab-questions", data: {toggle: "tab" }
     %li
-      =link_to "Replies", "tab-replies", data: {toggle: "tab" }
+      =link_to "Replies", "#tab-replies", data: {toggle: "tab" }
     %li
-      =link_to "Stats", "tab-stats", data: {toggle: "tab" }
+      =link_to "Stats", "#tab-stats", data: {toggle: "tab" }
   .tab-content
-    #tab-questions.active
+    #tab-questions.tab-pane.active
       %h2 Questions
 
       %ul
@@ -20,10 +20,10 @@
             -question.possible_answers.each do |possible_answer|
               %li=possible_answer.title
 
-          %p.btn-group
-            = link_to 'Edit', edit_poll_path(@poll), class: "btn btn-default"
-            = link_to 'Back', polls_path, class: "btn btn-default"
-            = link_to 'Add Question', new_poll_question_path(@poll), class: "btn btn-default"
+        %p.btn-group
+          = link_to 'Edit', edit_poll_path(@poll), class: "btn btn-default"
+          = link_to 'Back', polls_path, class: "btn btn-default"
+          = link_to 'Add Question', new_poll_question_path(@poll), class: "btn btn-default"
 
     #tab-replies.tab-pane
       %h2 Replies
@@ -39,3 +39,4 @@
                   %dd
                     =answer.value.present? ? answer.value : answer.possible_answer.title
     #tab-stats.tab-pane
+      hello

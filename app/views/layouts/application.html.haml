@@ -5,8 +5,9 @@
     %title Tutspolls
     = csrf_meta_tags
     = stylesheet_link_tag    'application', media: 'all', 'data-turbolinks-track': 'reload'
+    = javascript_include_tag 'http://d3js.org/d3.v3.min.js'
     = javascript_include_tag 'application', 'data-turbolinks-track': 'reload'
-    = javascript_include_tag '//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js'
+    = javascript_include_tag '//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js' , integrity: true, crossorigin: :anonymous
     %body
     =render 'nav'
     .container
