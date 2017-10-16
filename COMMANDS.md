@@ -604,6 +604,8 @@ After converting the above bootstrap tab code to haml by using the aboe website 
 
 Next we need to style the list of polls via the [commit](https://github.com/josemotanet/tutspolls/commit/74d4e05496d5ae470b4684867c5b2e2d46330b33)
 
+
+
 ## 3.1 Polls Taken Over Time_ Gathering Data
 
 Up until now, we have provided users the means to defined a set polls with questions and possible answers thay can take.
@@ -1114,3 +1116,13 @@ Now we are going to fast-forward and uncomment the rest of the test. We complete
 Finished in 13.979463s, 0.5007 runs/s, 0.6438 assertions/s.
 7 runs, 9 assertions, 0 failures, 0 errors, 0 skips
 ```
+In addition of using minitest and factory girl gems we are also including [yard](https://yardoc.org/) gem.
+ 
+
+## 3.2 Introducing Google Charts
+
+Before we start working on the graph portion of this appplication, we need use partials to split info on poll.
+
+We going to focus on D3.js instead of Google charts because not all clients have access to Google Charts.
+
+So we need to prepare the tabs in polls to show stats graphs.

@@ -19,6 +19,7 @@ gem 'turbolinks', '~> 5'
 gem 'jbuilder', '~> 2.5'
 gem 'haml-rails'
 gem 'pry-rails'
+gem 'yard'
 
 gem 'spring' , group: :development
 
