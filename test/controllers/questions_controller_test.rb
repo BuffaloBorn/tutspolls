@@ -1,48 +1,49 @@
 require 'test_helper'
 
-class QuestionsControllerTest < ActionDispatch::IntegrationTest
+class QuestionsControllerTest < ActionController::TestCase
   setup do
     @question = questions(:one)
   end
 
   test "should get index" do
-    get questions_url
+    get :index
     assert_response :success
+    assert_not_nil assigns(:questions)
   end
 
   test "should get new" do
-    get new_question_url
+    get :new
     assert_response :success
   end
 
   test "should create question" do
     assert_difference('Question.count') do
-      post questions_url, params: { question: { kind: @question.kind, title: @question.title } }
+      post :create, question: { poll_id: @question.poll_id, title: @question.title, kind: @question.kind }
     end
 
-    assert_redirected_to question_url(Question.last)
+    assert_redirected_to question_path(assigns(:question))
   end
 
   test "should show question" do
-    get question_url(@question)
+    get :show, id: @question
     assert_response :success
   end
 
   test "should get edit" do
-    get edit_question_url(@question)
+    get :edit, id: @question
     assert_response :success
   end
 
   test "should update question" do
-    patch question_url(@question), params: { question: { kind: @question.kind, title: @question.title } }
-    assert_redirected_to question_url(@question)
+    patch :update, id: @question, question: { poll_id: @question.poll_id, title: @question.title, kind: @question.kind }
+    assert_redirected_to question_path(assigns(:question))
   end
 
   test "should destroy question" do
     assert_difference('Question.count', -1) do
-      delete question_url(@question)
+      delete :destroy, id: @question
     end
 
-    assert_redirected_to questions_url
+    assert_redirected_to questions_path
   end
 end
