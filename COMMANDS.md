@@ -568,9 +568,9 @@ As we review the additional narkup add in this section, we see that we have crea
 The idea being that the term-to-be-defined is held in the <dt> element, and the definition of that term is given in the <dd>. We can see that the first question displays the value that we stored for the answer but for the second question we are showing the possible answer because it value we can choose from. The question is multiple choose not free form answer. This do to the fact that  ```=answer.value.present? ? answer.value : answer.possible_answer.title``` checks if we are displaying a value or a possible_answer&#39;s title.
 
 
-One thing that we can do to improve the layout is to move the button in above the new Replies header.
+One thing that we can do to improve the layout is to move the button above the new Replies header.
 
-We also going to add a tab navigation by using bootstrap standard layout from [bootstrap js](https://getbootstrap.com/docs/3.3/javascript/). Here we will see many components that relay on javascript but we only care for is [bootstrap tab](https://getbootstrap.com/docs/3.3/javascript/#tabs
+We also going to add a tab navigation by using bootstrap standard layout from [bootstrap js](https://getbootstrap.com/docs/3.3/javascript/). Here we will see many components that relay on javascript but we only care for is [bootstrap tab](https://getbootstrap.com/docs/3.3/javascript/#tabs)
 
 Here we can see that tabs that can have dropdowns or not. In our case, we are just have three tabs one for questions, one for replies and the last one for statistics. So are do not want to rely on to much javascript so we are going to use ```data-attributes```. We are listing all the tabs and provide a section of ```div```s that will have our previous content.
 
@@ -601,6 +601,8 @@ After converting the above bootstrap tab code to haml by using the aboe website 
 ```javascript
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
 ```
+
+Next we need to style the list of polls via the [commit](https://github.com/josemotanet/tutspolls/commit/74d4e05496d5ae470b4684867c5b2e2d46330b33)
 
 ## 3.1 Polls Taken Over Time_ Gathering Data
 
@@ -1103,13 +1105,12 @@ Now we are going to fast-forward and uncomment the rest of the test. We complete
 ```
  Now we can re-run ```bin/rake test:units``` to see if we pass the previous failed test:
 
- ```un options: --seed 8709
+ ```
+ un options: --seed 8709
 
 # Running:
 
 .......
-
 Finished in 13.979463s, 0.5007 runs/s, 0.6438 assertions/s.
 7 runs, 9 assertions, 0 failures, 0 errors, 0 skips
-
- ```
+```

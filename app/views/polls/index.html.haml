@@ -1,13 +1,17 @@
-%h1 Listing polls
+%h1 All polls
 
-%ul
-  -@polls.each do |poll|
-    %li
-      %p= link_to poll.title, poll
-      %p.btn-group.btn-group-xs
-      = link_to 'Edit', edit_poll_path(poll), class: "btn btn-default"
-      = link_to 'Back',  polls_path(poll), class: "btn btn-default"
-      = link_to 'Add Question', new_poll_question_path(poll), class: "btn btn-default"
-      = link_to 'Answer', new_poll_reply_path(poll), class: "btn btn-default"
-%p
-  = link_to 'New Poll', new_poll_path, class: "btn btn-primary"
+- unless @polls.any?
+  %p.bg-info.flash No polls.
+
+%ul.clearfix.polls
+  - @polls.each do |poll|
+    %li.col-md-6.polls-poll
+      .polls-poll-detail
+        %h2
+          =link_to poll.title, new_poll_reply_path(poll)
+          =link_to "Manage", poll, class: "label label-default"
+
+  %li.col-md-6.polls-poll
+    .polls-poll-detail
+      %h2
+        = link_to '+', new_poll_path
