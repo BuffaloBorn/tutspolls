@@ -20,6 +20,7 @@ gem 'jbuilder', '~> 2.5'
 gem 'haml-rails'
 gem 'pry-rails'
 gem 'yard'
+gem 'd3_rails'
 
 gem 'spring' , group: :development
 
