@@ -3,8 +3,8 @@
     (function($) {
       $(function() {
         var selector = "#polls_per_month";
-        var data = #{@poll.serialize_for_graph};
-
+        var data = "#{@poll.serialize_for_graph}"";
+          alert(data);
         Graph.bar(selector,data);
       });
     })(jQuery);
