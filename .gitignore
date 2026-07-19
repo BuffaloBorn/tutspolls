@@ -16,3 +16,11 @@
 /tmp
 
 .yardoc/
+
+# Ignore secrets file - should never be committed
+config/secrets.yml
+
+# Environment variables
+.env
+.env.local
+.env.*.local
